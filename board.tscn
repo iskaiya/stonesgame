@@ -5,8 +5,9 @@
 [ext_resource type="Script" uid="uid://85j16h363r4k" path="res://Board.gd" id="2_jqgjh"]
 [ext_resource type="Texture2D" uid="uid://caisd1tckod53" path="res://ASSETS/player2.png" id="3_jqgjh"]
 [ext_resource type="Script" uid="uid://ccts7fhefn2av" path="res://UI.gd" id="5_vf5bc"]
+[ext_resource type="Script" uid="uid://uwiro6c25r5f" path="res://InnerBoard.gd" id="6_mgc1s"]
 
-[node name="Board" type="Sprite2D" unique_id=1408644525 node_paths=PackedStringArray("trackpoints_node", "player1_node", "player2_node")]
+[node name="Board" type="Sprite2D" unique_id=1408644525 node_paths=PackedStringArray("trackpoints_node", "player1_node", "player2_node", "inner_board")]
 position = Vector2(332.5, 185.868)
 scale = Vector2(0.4915902, 0.4969239)
 texture = ExtResource("1_p0ybc")
@@ -14,17 +15,18 @@ script = ExtResource("2_jqgjh")
 trackpoints_node = NodePath("Trackpoints")
 player1_node = NodePath("Players/Player1")
 player2_node = NodePath("Players/Player2")
+inner_board = NodePath("InnerBoard")
 
 [node name="Players" type="Node2D" parent="." unique_id=886661121]
 
 [node name="Player1" type="Sprite2D" parent="Players" unique_id=506937332]
-position = Vector2(-515.93335, -264.338)
-scale = Vector2(0.25500953, 0.26572394)
+position = Vector2(-498.3826, -287.0007)
+scale = Vector2(0.17494251, 0.17507319)
 texture = ExtResource("2_8l818")
 
 [node name="Player2" type="Sprite2D" parent="Players" unique_id=515722307]
-position = Vector2(-510.74286, -99.51549)
-scale = Vector2(0.24688564, 0.26658592)
+position = Vector2(-501.4339, -182.861)
+scale = Vector2(0.1559902, 0.1654911)
 texture = ExtResource("3_jqgjh")
 
 [node name="Dots" type="Node2D" parent="." unique_id=1854034044]
@@ -32,6 +34,7 @@ texture = ExtResource("3_jqgjh")
 [node name="Turn" type="Sprite2D" parent="." unique_id=779816518]
 
 [node name="Trackpoints" type="Node2D" parent="." unique_id=1753371267]
+visible = false
 
 [node name="spc1" type="Marker2D" parent="Trackpoints" unique_id=708608317]
 position = Vector2(-313.50476, -271.59436)
@@ -143,3 +146,9 @@ position = Vector2(-320.77142, -189.70142)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=794853171]
 script = ExtResource("5_vf5bc")
+
+[node name="InnerBoard" type="Node2D" parent="." unique_id=1457900411]
+script = ExtResource("6_mgc1s")
+human_quarter_origin = Vector2(-265, -200)
+ai_quarter_origin = Vector2(0, 5)
+cell_size = Vector2(55, 55)

@@ -55,16 +55,30 @@ func apply_action(state: GameState, is_ai: bool) -> String:
 			else:
 				msg = "%s has no stones to return — turn passed." % actor
 
-		# ── P1 / P2 — place stones from hand onto board ───────────────────
+		# ── P1 / P2 ───────────────────────────────────────────────────────
+		# Stones are added to hand — the player then clicks a cell to place.
+		# For AI, auto-place is used since AI has no click input.
 		"place":
-			var n: int      = 1 if label == "P1" else 2
-			var hand: int   = state.ai_hand if is_ai else state.human_hand
-			var to_place: int = mini(n, hand)
-			var placed: int = state.place_stones(is_ai, to_place)
-			if placed > 0:
-				msg = "%s placed %d stone(s) on their board." % [actor, placed]
+			var n: int = 1 if label == "P1" else 2
+			if is_ai:
+				# AI auto-places in best available cell
+				var placed: int = state.place_stones(true, n)
+				if placed > 0:
+					msg = "%s placed %d stone(s) on their board." % [actor, placed]
+				else:
+					msg = "%s has no stones to place — turn passed." % actor
 			else:
-				msg = "%s has no stones to place — turn passed." % actor
+				# Human: add to hand, they will click to place
+				var empty_cells: int = 0
+				for v in state.human_board:
+					if v == 0: empty_cells += 1
+				var can_place: int = mini(n, empty_cells)
+				if can_place > 0:
+					state.human_hand += can_place
+					# Clamp hand so it never exceeds board empty spaces + existing hand
+					msg = "%s gained %d stone(s) to place — click your board!" % [actor, can_place]
+				else:
+					msg = "%s has no empty cells left!" % actor
 
 		# ── R1 — remove 1 opponent stone (back to cache) ──────────────────
 		"remove":

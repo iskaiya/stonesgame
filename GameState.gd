@@ -172,16 +172,12 @@ func stones_on_board(is_ai: bool) -> int:
 
 
 func locked_set(is_ai: bool) -> Dictionary:
-	var count: int    = stones_on_board(is_ai)
-	var filled: Array = []
-	for i in range(16):
-		filled.append(1 if i < count else 0)
-
+	var board: Array = ai_board if is_ai else human_board
 	var locked: Dictionary = {}
 	for line in LOCKED_LINES:
 		var full: bool = true
 		for idx in line:
-			if filled[idx] == 0:
+			if board[idx] == 0:
 				full = false
 				break
 		if full:
@@ -191,28 +187,42 @@ func locked_set(is_ai: bool) -> Dictionary:
 
 
 func count_locked_rows(is_ai: bool) -> int:
-	var count: int    = stones_on_board(is_ai)
-	var filled: Array = []
-	for i in range(16):
-		filled.append(1 if i < count else 0)
+	var board: Array = ai_board if is_ai else human_board
 	var rows: int = 0
 	for line in LOCKED_LINES:
 		var full: bool = true
 		for idx in line:
-			if filled[idx] == 0:
+			if board[idx] == 0:
 				full = false
 				break
 		if full: rows += 1
 	return rows
 
 
+## Place a stone at a specific cell index (0-15, row*4+col).
+## Returns true if successful.
+func place_stone_at(is_ai: bool, cell_idx: int) -> bool:
+	var board: Array = ai_board if is_ai else human_board
+	if cell_idx < 0 or cell_idx >= 16: return false
+	if board[cell_idx] != 0: return false
+	var hand: int = ai_hand if is_ai else human_hand
+	if hand <= 0: return false
+	board[cell_idx] = 1
+	if is_ai:
+		ai_hand  = hand - 1
+	else:
+		human_hand = hand - 1
+	return true
+
+
+## Auto-place n stones in the first available cells (used by AI and space actions).
+## Returns actual placed count.
 func place_stones(is_ai: bool, n: int) -> int:
-	var board: Array = (ai_board if is_ai else human_board).duplicate()
-	var hand: int    =  ai_hand  if is_ai else human_hand
+	var board: Array = ai_board if is_ai else human_board
+	var hand: int    = ai_hand  if is_ai else human_hand
 	var placed: int  = 0
 	for i in range(16):
-		if placed >= n or hand <= 0:
-			break
+		if placed >= n or hand <= 0: break
 		if board[i] == 0:
 			board[i] = 1
 			hand    -= 1
