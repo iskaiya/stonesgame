@@ -1,0 +1,145 @@
+[gd_scene format=3 uid="uid://b6e6hq7g3syrs"]
+
+[ext_resource type="Texture2D" uid="uid://diskiffbkkip6" path="res://ASSETS/board.png" id="1_p0ybc"]
+[ext_resource type="Texture2D" uid="uid://b66x7vrd74nb1" path="res://ASSETS/player1.png" id="2_8l818"]
+[ext_resource type="Script" uid="uid://85j16h363r4k" path="res://Board.gd" id="2_jqgjh"]
+[ext_resource type="Texture2D" uid="uid://caisd1tckod53" path="res://ASSETS/player2.png" id="3_jqgjh"]
+[ext_resource type="Script" uid="uid://ccts7fhefn2av" path="res://UI.gd" id="5_vf5bc"]
+
+[node name="Board" type="Sprite2D" unique_id=1408644525 node_paths=PackedStringArray("trackpoints_node", "player1_node", "player2_node")]
+position = Vector2(332.5, 185.868)
+scale = Vector2(0.4915902, 0.4969239)
+texture = ExtResource("1_p0ybc")
+script = ExtResource("2_jqgjh")
+trackpoints_node = NodePath("Trackpoints")
+player1_node = NodePath("Players/Player1")
+player2_node = NodePath("Players/Player2")
+
+[node name="Players" type="Node2D" parent="." unique_id=886661121]
+
+[node name="Player1" type="Sprite2D" parent="Players" unique_id=506937332]
+position = Vector2(-515.93335, -264.338)
+scale = Vector2(0.25500953, 0.26572394)
+texture = ExtResource("2_8l818")
+
+[node name="Player2" type="Sprite2D" parent="Players" unique_id=515722307]
+position = Vector2(-510.74286, -99.51549)
+scale = Vector2(0.24688564, 0.26658592)
+texture = ExtResource("3_jqgjh")
+
+[node name="Dots" type="Node2D" parent="." unique_id=1854034044]
+
+[node name="Turn" type="Sprite2D" parent="." unique_id=779816518]
+
+[node name="Trackpoints" type="Node2D" parent="." unique_id=1753371267]
+
+[node name="spc1" type="Marker2D" parent="Trackpoints" unique_id=708608317]
+position = Vector2(-313.50476, -271.59436)
+
+[node name="spc2" type="Marker2D" parent="Trackpoints" unique_id=242124601]
+position = Vector2(-233.57143, -279.88733)
+
+[node name="spc3" type="Marker2D" parent="Trackpoints" unique_id=1768216551]
+position = Vector2(-175.4381, -278.8507)
+
+[node name="spc4" type="Marker2D" parent="Trackpoints" unique_id=1091862446]
+position = Vector2(-120.41905, -279.88733)
+
+[node name="spc5" type="Marker2D" parent="Trackpoints" unique_id=284808605]
+position = Vector2(-61.247623, -277.8141)
+
+[node name="spc6" type="Marker2D" parent="Trackpoints" unique_id=410668011]
+position = Vector2(-7.26667, -277.8141)
+
+[node name="spc7" type="Marker2D" parent="Trackpoints" unique_id=1567791285]
+position = Vector2(53.98095, -279.88733)
+
+[node name="spc8" type="Marker2D" parent="Trackpoints" unique_id=317257651]
+position = Vector2(109, -279.88733)
+
+[node name="spc9" type="Marker2D" parent="Trackpoints" unique_id=1290516377]
+position = Vector2(165.05714, -280.92395)
+
+[node name="spc10" type="Marker2D" parent="Trackpoints" unique_id=1586041461]
+position = Vector2(252.25714, -264.33804)
+
+[node name="spc11" type="Marker2D" parent="Trackpoints" unique_id=185248582]
+position = Vector2(268.86667, -186.59157)
+
+[node name="spc12" type="Marker2D" parent="Trackpoints" unique_id=942496063]
+position = Vector2(268.86667, -128.54086)
+
+[node name="spc13" type="Marker2D" parent="Trackpoints" unique_id=1927980009]
+position = Vector2(268.86667, -71.52678)
+
+[node name="spc14" type="Marker2D" parent="Trackpoints" unique_id=1221888208]
+position = Vector2(269.9048, -15.549318)
+
+[node name="spc15" type="Marker2D" parent="Trackpoints" unique_id=734077755]
+position = Vector2(269.9048, 41.46476)
+
+[node name="spc16" type="Marker2D" parent="Trackpoints" unique_id=1866425230]
+position = Vector2(269.9048, 95.36898)
+
+[node name="spc17" type="Marker2D" parent="Trackpoints" unique_id=829477017]
+position = Vector2(269.9048, 158.60281)
+
+[node name="spc18" type="Marker2D" parent="Trackpoints" unique_id=1022682431]
+position = Vector2(267.82858, 211.47041)
+
+[node name="spc19" type="Marker2D" parent="Trackpoints" unique_id=1461689357]
+position = Vector2(253.29526, 289.2169)
+
+[node name="spc20" type="Marker2D" parent="Trackpoints" unique_id=692655790]
+position = Vector2(170.24763, 297.50986)
+
+[node name="spc21" type="Marker2D" parent="Trackpoints" unique_id=32266968]
+position = Vector2(109.000015, 297.50986)
+
+[node name="spc22" type="Marker2D" parent="Trackpoints" unique_id=1055407476]
+position = Vector2(48.790493, 305.80283)
+
+[node name="spc23" type="Marker2D" parent="Trackpoints" unique_id=1676263146]
+position = Vector2(-1.0380783, 300.61972)
+
+[node name="spc24" type="Marker2D" parent="Trackpoints" unique_id=849032633]
+position = Vector2(-61.2476, 300.61972)
+
+[node name="spc25" type="Marker2D" parent="Trackpoints" unique_id=1838843046]
+position = Vector2(-121.45712, 300.61972)
+
+[node name="spc26" type="Marker2D" parent="Trackpoints" unique_id=1763685340]
+position = Vector2(-174.40001, 300.61972)
+
+[node name="spc27" type="Marker2D" parent="Trackpoints" unique_id=2063008528]
+position = Vector2(-231.49524, 300.61972)
+
+[node name="spc28" type="Marker2D" parent="Trackpoints" unique_id=140248546]
+position = Vector2(-304.1619, 295.4366)
+
+[node name="spc29" type="Marker2D" parent="Trackpoints" unique_id=994157648]
+position = Vector2(-315.58093, 211.47043)
+
+[node name="spc30" type="Marker2D" parent="Trackpoints" unique_id=1650290006]
+position = Vector2(-318.69525, 151.3465)
+
+[node name="spc31" type="Marker2D" parent="Trackpoints" unique_id=1072965656]
+position = Vector2(-318.69525, 101.58875)
+
+[node name="spc32" type="Marker2D" parent="Trackpoints" unique_id=887519642]
+position = Vector2(-320.77145, 41.46478)
+
+[node name="spc33" type="Marker2D" parent="Trackpoints" unique_id=1443787731]
+position = Vector2(-320.77142, -13.476063)
+
+[node name="spc34" type="Marker2D" parent="Trackpoints" unique_id=678757221]
+position = Vector2(-320.77142, -74.63663)
+
+[node name="spc35" type="Marker2D" parent="Trackpoints" unique_id=1053001341]
+position = Vector2(-320.77142, -128.54085)
+
+[node name="spc36" type="Marker2D" parent="Trackpoints" unique_id=1769300837]
+position = Vector2(-320.77142, -189.70142)
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=794853171]
+script = ExtResource("5_vf5bc")

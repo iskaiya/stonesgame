@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dilo5tbe1gwua"]
+
+[ext_resource type="Texture2D" uid="uid://303gesxleptj" path="res://ASSETS/pink piece.png" id="1_wtcfe"]
+
+[node name="Node2D" type="Node2D" unique_id=305563209]
+
+[node name="PinkPiece" type="Sprite2D" parent="." unique_id=1427234557]
+position = Vector2(114, 231)
+texture = ExtResource("1_wtcfe")
