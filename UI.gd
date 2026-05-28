@@ -34,6 +34,13 @@ var _btn_ccw:         Button
 var _btn_place:       Button
 var _corner_btns:     Array = []   # Array of Button
 var _log_label:       Label
+var _lbl_current_space: Label
+
+# Win overlay
+var _win_overlay:   ColorRect
+var _win_title:     Label
+var _win_sub:       Label
+var _btn_restart:   Button
 
 # Recent log lines
 var _log_lines: Array = []
@@ -157,20 +164,57 @@ func _build_ui() -> void:
 	_btn_roll.pressed.connect(func(): board.human_roll_dice())
 	inner.add_child(_btn_roll)
 
-	# ── Manual place stone button ─────────────────────────────────────────
-	_btn_place = Button.new()
-	_btn_place.text = "📥 Place Stone from Hand"
-	_btn_place.pressed.connect(func(): board.human_place_stone_manually())
-	_btn_place.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	inner.add_child(_btn_place)
+	# Place stone button removed — player clicks cell directly after P1/P2
+	_btn_place = Button.new()  # kept as dummy so references don't break
 
 	_add_separator(inner)
 
 	# ── Log ───────────────────────────────────────────────────────────────
+	_add_separator(inner)
+
+	# Current space indicator
+	inner.add_child(_make_label("Current space:", 11, true))
+	_lbl_current_space = _make_label("—", 11, false)
+	inner.add_child(_lbl_current_space)
+
+	_add_separator(inner)
+
 	inner.add_child(_make_label("Log:", 11, true))
 	_log_label = _make_label("", 11, false)
 	_log_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	inner.add_child(_log_label)
+
+	# ── Win overlay (full screen, shown on game over) ─────────────────────
+	_win_overlay = ColorRect.new()
+	_win_overlay.color = Color(0, 0, 0, 0.72)
+	_win_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_win_overlay.visible = false
+	add_child(_win_overlay)
+
+	var win_center := CenterContainer.new()
+	win_center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_win_overlay.add_child(win_center)
+
+	var win_vbox := VBoxContainer.new()
+	win_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	win_vbox.add_theme_constant_override("separation", 14)
+	win_vbox.custom_minimum_size = Vector2(400, 0)
+	win_center.add_child(win_vbox)
+
+	_win_title = _make_label("", 36, true)
+	_win_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	win_vbox.add_child(_win_title)
+
+	_win_sub = _make_label("", 16, false)
+	_win_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_win_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	win_vbox.add_child(_win_sub)
+
+	_btn_restart = Button.new()
+	_btn_restart.text = "↺  Play Again"
+	_btn_restart.custom_minimum_size = Vector2(180, 48)
+	_btn_restart.pressed.connect(_on_restart_pressed)
+	win_vbox.add_child(_btn_restart)
 
 
 # ── Signal connections ────────────────────────────────────────────────────
@@ -204,11 +248,15 @@ func _on_state_updated(state: GameState) -> void:
 	_lbl_ai_hand.text     = "  Hand: %d" % state.ai_hand
 	_lbl_ai_board.text    = "  Board: %d / 16" % state.stones_on_board(true)
 
+	# Current space label
+	if state.human_pos >= 0:
+		var sp: Dictionary = state.space_at(state.human_pos)
+		_lbl_current_space.text = "You: %s" % sp["label"]
+
 	# Show place button only when human has stones in hand on their turn
-	_btn_place.visible = (
-		state.human_hand > 0
-		and board.current_phase == board.Phase.HUMAN_ROLL
-	)
+	# Place button ONLY shows when in HUMAN_PLACING phase
+	# i.e. player just landed on P1 or P2
+	_btn_place.visible = false   # never shown — cell click handles placing
 
 
 func _on_human_turn_started(round_num: int, can_choose_direction: bool) -> void:
@@ -216,7 +264,7 @@ func _on_human_turn_started(round_num: int, can_choose_direction: bool) -> void:
 	_btn_roll.visible  = true
 	_btn_cw.visible    = can_choose_direction
 	_btn_ccw.visible   = can_choose_direction
-	_btn_place.visible = (board.state.human_hand > 0)
+	_btn_place.visible = false
 
 
 func _on_roll_result(player: String, roll: int, _space: Dictionary) -> void:
@@ -243,15 +291,31 @@ func _on_game_over(winner: String) -> void:
 	_btn_place.visible = false
 	_set_corner_buttons_visible(false)
 	if winner == "human":
-		_lbl_status.text = "🎉 YOU WIN!\nYou filled the board first!"
+		_lbl_status.text = "🎉 YOU WIN!"
+		_win_title.text  = "🎉  YOU WIN!"
+		_win_sub.text    = "You filled your board first!\nCongratulations!"
+		_win_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 	else:
-		_lbl_status.text = "🤖 AI WINS!\nBetter luck next time."
+		_lbl_status.text = "🤖 AI WINS!"
+		_win_title.text  = "🤖  AI WINS!"
+		_win_sub.text    = "The AI filled its board first.\nBetter luck next time!"
+		_win_title.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
+	_win_overlay.visible = true
+
+
+func _on_restart_pressed() -> void:
+	_win_overlay.visible = false
+	_log_lines.clear()
+	_log_label.text = ""
+	_lbl_current_space.text = "—"
+	board.get_tree().reload_current_scene()
 
 
 func _on_request_corner_choice(_corners: Array) -> void:
 	_lbl_status.text = "Choose your starting corner!"
 	_set_corner_buttons_visible(true)
 	_btn_roll.visible = false
+	_win_overlay.visible = false
 
 
 func _on_request_direction_choice() -> void:

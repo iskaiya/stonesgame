@@ -37,9 +37,12 @@ enum Phase {
 	HUMAN_ROLL,
 	HUMAN_CHOOSE_DIRECTION,
 	HUMAN_ACTION_PENDING,
+	HUMAN_PLACING,        # waiting for human to click cells to place stones
 	AI_TURN,
 	GAME_OVER,
 }
+# How many stones the human still needs to place this turn
+var _stones_to_place: int = 0
 var current_phase: Phase = Phase.SETUP_CORNER_CHOICE
 
 var human_chosen_direction: String = "cw"
@@ -98,7 +101,8 @@ func _emit_state() -> void:
 		inner_board.refresh(state)
 		# Enable click-to-place when it's human's turn and they have stones
 		inner_board.set_placement_mode(
-			current_phase == Phase.HUMAN_ROLL and state.human_hand > 0
+			(current_phase == Phase.HUMAN_ROLL or current_phase == Phase.HUMAN_PLACING)
+			and state.human_hand > 0
 		)
 
 
@@ -155,16 +159,19 @@ func _do_setup_roll() -> void:
 
 func _start_human_turn() -> void:
 	current_phase = Phase.HUMAN_ROLL
+	_pending_roll = 0
 	emit_signal("human_turn_started", state.round_number, state.human_first_done)
+	emit_signal("state_updated", state)
 
 
 func human_roll_dice() -> void:
 	if current_phase != Phase.HUMAN_ROLL: return
 	var roll: int = randi_range(1, 6)
+	_pending_roll = roll   # set so place button hides immediately
 	emit_signal("roll_result", "human", roll, {})
+	emit_signal("state_updated", state)  # refresh UI to hide place button
 
 	if state.human_first_done:
-		_pending_roll = roll
 		current_phase = Phase.HUMAN_CHOOSE_DIRECTION
 		emit_signal("request_direction_choice")
 	else:
@@ -178,6 +185,7 @@ func human_chose_direction(direction: String) -> void:
 
 func _resolve_human_move(roll: int, direction: String) -> void:
 	current_phase    = Phase.HUMAN_ACTION_PENDING
+	state.human_stones_to_place = 0   # always reset before resolving action
 	var old_pos: int = state.human_pos
 	var new_pos: int = state.move_pos(state.human_pos, roll, direction)
 	state.human_pos  = new_pos
@@ -196,10 +204,54 @@ func _resolve_human_move(roll: int, direction: String) -> void:
 		emit_signal("game_over", winner)
 		return
 
+	# Only pause for placing if P1/P2 explicitly set stones_to_place
+	if state.human_stones_to_place > 0:
+		_start_human_placing()
+		return
+
 	state.human_first_done = true
 	state.round_number    += 1
 	await get_tree().create_timer(0.4).timeout
 	_start_ai_turn()
+
+
+# ── Human placing phase ──────────────────────────────────────────────────
+
+func _start_human_placing() -> void:
+	current_phase    = Phase.HUMAN_PLACING
+	_stones_to_place = state.human_stones_to_place
+	emit_signal("action_resolved", "human",
+		"Click a cell to place your stone(s)! (%d remaining)" % _stones_to_place)
+	_emit_state()
+
+
+# Override cell click to handle placing phase too
+func _on_cell_clicked(_is_ai: bool, cell_idx: int) -> void:
+	# Allow clicks in both HUMAN_ROLL and HUMAN_PLACING phases
+	if current_phase != Phase.HUMAN_ROLL and current_phase != Phase.HUMAN_PLACING:
+		return
+	if state.human_hand <= 0:
+		emit_signal("action_resolved", "human", "No stones in hand!")
+		return
+	var ok: bool = state.place_stone_at(false, cell_idx)
+	if ok:
+		state.human_stones_to_place -= 1
+		_stones_to_place = state.human_stones_to_place
+		emit_signal("action_resolved", "human",
+			"Stone placed!%s" % (" (%d more to place)" % _stones_to_place if _stones_to_place > 0 else ""))
+		_emit_state()
+		var winner: String = state.check_winner()
+		if winner != "":
+			current_phase = Phase.GAME_OVER
+			emit_signal("game_over", winner)
+			return
+		# Done placing when counter hits 0
+		if current_phase == Phase.HUMAN_PLACING and state.human_stones_to_place == 0:
+			state.human_first_done = true
+			state.round_number    += 1
+			_start_ai_turn()
+	else:
+		emit_signal("action_resolved", "human", "That cell is already taken!")
 
 
 # ── AI turn ───────────────────────────────────────────────────────────────
@@ -242,34 +294,8 @@ func _start_ai_turn() -> void:
 # ── Manual stone placement ────────────────────────────────────────────────
 
 func human_place_stone_manually() -> void:
-	# Legacy button — still works as auto-place fallback
-	if current_phase != Phase.HUMAN_ROLL: return
-	if state.human_hand <= 0:
-		emit_signal("action_resolved", "human", "No stones in hand to place.")
-		return
-	var placed: int = state.place_stones(false, 1)
-	if placed > 0:
-		emit_signal("action_resolved", "human", "You placed 1 stone on your board.")
-		_emit_state()
-	var winner: String = state.check_winner()
-	if winner != "":
-		current_phase = Phase.GAME_OVER
-		emit_signal("game_over", winner)
-
-
-## Called when human clicks a cell in the inner board
-func _on_cell_clicked(_is_ai: bool, cell_idx: int) -> void:
-	if current_phase != Phase.HUMAN_ROLL: return
-	if state.human_hand <= 0:
-		emit_signal("action_resolved", "human", "No stones in hand!")
-		return
-	var ok: bool = state.place_stone_at(false, cell_idx)
-	if ok:
-		emit_signal("action_resolved", "human", "You placed a stone.")
-		_emit_state()
-		var winner: String = state.check_winner()
-		if winner != "":
-			current_phase = Phase.GAME_OVER
-			emit_signal("game_over", winner)
-	else:
-		emit_signal("action_resolved", "human", "That cell is already taken!")
+	# Called by Place Stone button - only active during HUMAN_PLACING
+	# (button is only visible after landing on P1/P2 anyway)
+	if current_phase != Phase.HUMAN_PLACING: return
+	# Nothing to do here - player clicks the cell directly
+	emit_signal("action_resolved", "human", "Click a cell on your board!")

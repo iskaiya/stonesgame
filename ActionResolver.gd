@@ -56,29 +56,24 @@ func apply_action(state: GameState, is_ai: bool) -> String:
 				msg = "%s has no stones to return — turn passed." % actor
 
 		# ── P1 / P2 ───────────────────────────────────────────────────────
-		# Stones are added to hand — the player then clicks a cell to place.
-		# For AI, auto-place is used since AI has no click input.
+		# Place N stones FROM HAND onto board.
+		# If hand is empty, turn is passed (no stones to place).
 		"place":
-			var n: int = 1 if label == "P1" else 2
-			if is_ai:
-				# AI auto-places in best available cell
+			var n: int    = 1 if label == "P1" else 2
+			var hand: int = state.ai_hand if is_ai else state.human_hand
+			if hand <= 0:
+				msg = "%s has no stones in hand — turn passed." % actor
+			elif is_ai:
 				var placed: int = state.place_stones(true, n)
-				if placed > 0:
-					msg = "%s placed %d stone(s) on their board." % [actor, placed]
-				else:
-					msg = "%s has no stones to place — turn passed." % actor
+				msg = "%s placed %d stone(s) on their board." % [actor, placed]
 			else:
-				# Human: add to hand, they will click to place
-				var empty_cells: int = 0
-				for v in state.human_board:
-					if v == 0: empty_cells += 1
-				var can_place: int = mini(n, empty_cells)
-				if can_place > 0:
-					state.human_hand += can_place
-					# Clamp hand so it never exceeds board empty spaces + existing hand
-					msg = "%s gained %d stone(s) to place — click your board!" % [actor, can_place]
-				else:
-					msg = "%s has no empty cells left!" % actor
+				# Human: flag how many they need to place, Board.gd handles the pause
+				var to_place: int = mini(n, hand)
+				state.human_hand -= to_place   # reserve them
+				state.human_hand += to_place   # put back — Board.gd will deduct on click
+				# Just signal how many to place via a special key in state
+				state.human_stones_to_place = to_place
+				msg = "%s must place %d stone(s) — click your board!" % [actor, to_place]
 
 		# ── R1 — remove 1 opponent stone (back to cache) ──────────────────
 		"remove":
@@ -114,27 +109,26 @@ func apply_action(state: GameState, is_ai: bool) -> String:
 			if removable < 0:
 				msg = "POWER — opponent has no stones on the board!"
 			else:
+				# Remove stone from opponent
 				opp_board[removable] = 0
 				if opp_is_ai:
 					state.ai_board = opp_board
 				else:
 					state.human_board = opp_board
 
-				# Place stolen stone directly onto your own board
-				# (POWER gives the stone straight to your quarter, no hand)
-				var my_board: Array = (state.ai_board if is_ai else state.human_board).duplicate()
-				var placed: bool    = false
-				for i in range(16):
-					if my_board[i] == 0:
-						my_board[i] = 1
-						placed      = true
-						break
 				if is_ai:
+					# AI auto-places stolen stone
+					var my_board: Array = state.ai_board.duplicate()
+					for i in range(16):
+						if my_board[i] == 0:
+							my_board[i] = 1
+							break
 					state.ai_board = my_board
+					msg = "AI used POWER — stole a stone onto their board!"
 				else:
-					state.human_board = my_board
-
-				msg = "%s used POWER — stole a stone directly onto their board!" % actor
+					# Human picks where to place the stolen stone
+					state.human_stones_to_place = 1
+					msg = "POWER! You stole a stone — click your board to place it!"
 
 		# ── TAKE — steal 1 stone into your hand ───────────────────────────
 		# Ignores locked rows. Blocked only if opponent is in SAFE corner.
