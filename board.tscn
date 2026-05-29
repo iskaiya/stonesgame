@@ -20,13 +20,13 @@ inner_board = NodePath("InnerBoard")
 [node name="Players" type="Node2D" parent="." unique_id=886661121]
 
 [node name="Player1" type="Sprite2D" parent="Players" unique_id=506937332]
-position = Vector2(-498.3826, -287.0007)
-scale = Vector2(0.17494251, 0.17507319)
+position = Vector2(-505.50235, -263.3562)
+scale = Vector2(0.09255677, 0.09005305)
 texture = ExtResource("2_8l818")
 
 [node name="Player2" type="Sprite2D" parent="Players" unique_id=515722307]
-position = Vector2(-501.4339, -182.861)
-scale = Vector2(0.1559902, 0.1654911)
+position = Vector2(-507.53656, -209.02194)
+scale = Vector2(0.09426889, 0.09884453)
 texture = ExtResource("3_jqgjh")
 
 [node name="Dots" type="Node2D" parent="." unique_id=1854034044]
@@ -34,7 +34,6 @@ texture = ExtResource("3_jqgjh")
 [node name="Turn" type="Sprite2D" parent="." unique_id=779816518]
 
 [node name="Trackpoints" type="Node2D" parent="." unique_id=1753371267]
-visible = false
 
 [node name="spc1" type="Marker2D" parent="Trackpoints" unique_id=708608317]
 position = Vector2(-313.50476, -271.59436)

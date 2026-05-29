@@ -35,6 +35,7 @@ var _btn_place:       Button
 var _corner_btns:     Array = []   # Array of Button
 var _log_label:       Label
 var _lbl_current_space: Label
+var _lbl_dice:          Label
 
 # Win overlay
 var _win_overlay:   ColorRect
@@ -159,6 +160,17 @@ func _build_ui() -> void:
 	dir_hbox.add_child(_btn_ccw)
 
 	# ── Roll button ───────────────────────────────────────────────────────
+	# Dice animation display
+	var _lbl_dice_wrap := CenterContainer.new()
+	inner.add_child(_lbl_dice_wrap)
+	_lbl_dice = Label.new()
+	_lbl_dice.text = "🎲"
+	var dice_settings := LabelSettings.new()
+	dice_settings.font_size = 42
+	_lbl_dice.label_settings = dice_settings
+	_lbl_dice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lbl_dice_wrap.add_child(_lbl_dice)
+
 	_btn_roll = Button.new()
 	_btn_roll.text = "🎲 Roll Dice"
 	_btn_roll.pressed.connect(func(): board.human_roll_dice())
@@ -241,6 +253,12 @@ func _set_initial_state() -> void:
 # ── Signal handlers ───────────────────────────────────────────────────────
 
 func _on_state_updated(state: GameState) -> void:
+	# Hide corner buttons once a corner has been chosen
+	if state.human_pos >= 0:
+		_set_corner_buttons_visible(false)
+		var lbl = _panel.find_child("CornerLabel", true, false)
+		if lbl: lbl.visible = false
+
 	_lbl_round.text       = "Round: %d" % state.round_number
 	_lbl_cache.text       = "Cache: %d" % state.cache
 	_lbl_human_hand.text  = "  Hand: %d" % state.human_hand
@@ -259,7 +277,7 @@ func _on_state_updated(state: GameState) -> void:
 	_btn_place.visible = false   # never shown — cell click handles placing
 
 
-func _on_human_turn_started(round_num: int, can_choose_direction: bool) -> void:
+func _on_human_turn_started(_round_num: int, can_choose_direction: bool) -> void:
 	_lbl_status.text   = "Your turn! Roll the dice."
 	_btn_roll.visible  = true
 	_btn_cw.visible    = can_choose_direction
@@ -270,18 +288,31 @@ func _on_human_turn_started(round_num: int, can_choose_direction: bool) -> void:
 func _on_roll_result(player: String, roll: int, _space: Dictionary) -> void:
 	var who: String = "You" if player == "human" else "AI"
 	_add_log("%s rolled %d" % [who, roll])
-	if player == "human":
-		_btn_roll.visible = false
+	_btn_roll.visible = false
+	_btn_cw.visible   = false
+	_btn_ccw.visible  = false
+	# Animate dice faces then show result
+	_animate_dice(roll)
 
 
-func _on_action_resolved(player: String, message: String) -> void:
+func _animate_dice(final_roll: int) -> void:
+	const FACES = ["⚀","⚁","⚂","⚃","⚄","⚅"]
+	# Flash random faces 8 times then land on result
+	var flashes = 8
+	for i in range(flashes):
+		var face = FACES[randi() % 6]
+		_lbl_status.text = face
+		await get_tree().create_timer(0.06 + i * 0.015).timeout
+	# Show final result
+	_lbl_status.text = "%s  →  %s" % [FACES[final_roll - 1], str(final_roll)]
+
+
+func _on_action_resolved(_player: String, message: String) -> void:
 	_lbl_status.text = message
 	_add_log(message)
-
-	# Hide direction buttons after a move resolves
-	if player == "human":
-		_btn_cw.visible  = false
-		_btn_ccw.visible = false
+	# Always hide direction buttons after any action
+	_btn_cw.visible  = false
+	_btn_ccw.visible = false
 
 
 func _on_game_over(winner: String) -> void:
@@ -318,14 +349,21 @@ func _on_request_corner_choice(_corners: Array) -> void:
 	_win_overlay.visible = false
 
 
+func _on_corner_chosen() -> void:
+	# Hide corner buttons permanently once a corner is picked
+	_set_corner_buttons_visible(false)
+	var lbl = _panel.find_child("CornerLabel", true, false)
+	if lbl: lbl.visible = false
+
+
+
+
+
 func _on_request_direction_choice() -> void:
-	_lbl_status.text  = "Choose direction, then confirm."
+	_lbl_status.text  = "Choose a direction!"
 	_btn_cw.visible   = true
 	_btn_ccw.visible  = true
-	_btn_roll.visible = false
-	# Show a confirm button by repurposing roll button
-	_btn_roll.text    = "✅ Confirm Direction"
-	_btn_roll.visible = true
+	_btn_roll.visible = false   # hide roll during direction choice
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────

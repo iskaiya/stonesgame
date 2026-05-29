@@ -17,7 +17,6 @@ signal action_resolved(player: String, message: String)
 signal game_over(winner: String)
 signal request_corner_choice(available_corners: Array)
 signal request_direction_choice()
-signal token_move(player: String, from_pos: Vector2, to_pos: Vector2)
 
 
 # ── Inspector exports ─────────────────────────────────────────────────────
@@ -61,6 +60,9 @@ func _ready() -> void:
 	# Connect inner board cell clicks
 	if inner_board:
 		inner_board.cell_clicked.connect(_on_cell_clicked)
+	# Connect AI debug signal so scores show in game log
+	AIAgent.ai_debug.connect(func(msg: String):
+		emit_signal("action_resolved", "ai", msg))
 	_begin_setup()
 
 
@@ -259,13 +261,13 @@ func _on_cell_clicked(_is_ai: bool, cell_idx: int) -> void:
 func _start_ai_turn() -> void:
 	current_phase = Phase.AI_TURN
 	emit_signal("action_resolved", "system", "AI is thinking...")
-	await get_tree().create_timer(0.8).timeout
+	await get_tree().create_timer(1.0).timeout
 
 	var roll: int = randi_range(1, 6)
 	emit_signal("roll_result", "ai", roll, {})
 
-	# Phase 5: replace with AIAgent.best_move(state, roll)
-	var direction: String = "cw"
+	# Round 1: follow corner arrow (CW). Round 2+: use expectiminimax.
+	var direction: String = "cw" if not state.ai_first_done else AIAgent.best_move(state, roll)
 
 	var old_pos: int = state.ai_pos
 	var new_pos: int = state.move_pos(state.ai_pos, roll, direction)

@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 ActionResolver="*uid://inwcyjw0hjxc"
+AIAgent="*uid://bwfghsukftpgk"
 
 [display]
 

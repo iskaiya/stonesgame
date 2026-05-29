@@ -119,7 +119,7 @@ func _input(event: InputEvent) -> void:
 # ── Hit-test: which cell is the mouse over? ───────────────────────────────
 ## Returns Vector2i(row, col) or Vector2i(-1,-1) if not over any cell.
 ## is_ai: which quarter to test
-func _get_cell_at(global_pos: Vector2, is_ai: bool) -> Vector2i:
+func _get_cell_at(global_pos: Vector2, _is_ai: bool) -> Vector2i:
 	# Test human quarter (players can only click their own)
 	var origin: Vector2 = human_quarter_origin
 	for row in range(4):
