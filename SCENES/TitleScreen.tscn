@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://cmjbl0guobrdr"]
+
+[ext_resource type="Script" uid="uid://ckqi3mha4vw6m" path="res://TitleScreen.gd" id="1_j83dj"]
+[ext_resource type="Texture2D" uid="uid://dlnhjhl8rx3u5" path="res://ASSETS/start.png" id="2_ojeyw"]
+
+[node name="TitleScreen" type="Control" unique_id=1404038085 node_paths=PackedStringArray("start_button")]
+layout_mode = 3
+anchor_right = 0.179
+anchor_bottom = 0.20400001
+offset_right = -229.12001
+offset_bottom = -146.88
+script = ExtResource("1_j83dj")
+start_button = NodePath("TextureRect/Button")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=139446838]
+layout_mode = 0
+offset_right = 654.0
+offset_bottom = 369.0
+texture = ExtResource("2_ojeyw")
+expand_mode = 1
+
+[node name="Button" type="Button" parent="TextureRect" unique_id=1928144667]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.162
+anchor_bottom = 0.19600001
+offset_left = 283.0
+offset_top = 227.0
+offset_right = 266.052
+offset_bottom = 182.676
+grow_horizontal = 2
+grow_vertical = 2

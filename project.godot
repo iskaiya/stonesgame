@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="StonesGame"
-run/main_scene="uid://b6e6hq7g3syrs"
+run/main_scene="uid://cmjbl0guobrdr"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
